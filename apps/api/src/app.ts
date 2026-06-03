@@ -82,6 +82,7 @@ const {
     size: 64,
     ignoredMethods: ["GET", "HEAD", "OPTIONS"],
 });
+// Skip CSRF in test environment so supertest can run without mock cookies
 if (process.env.NODE_ENV !== "test") {
     app.use(doubleCsrfProtection);
 }
