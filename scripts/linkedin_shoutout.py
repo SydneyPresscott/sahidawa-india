@@ -189,30 +189,30 @@ def generate_post_with_gemini(pr: dict, tier_display: str, tier_desc: str) -> st
     gemini_api_key = get_env_or_exit("GEMINI_API_KEY")
 
     system_prompt = (
-        f"You are the social media voice of '{PROJECT_NAME}', {PROJECT_TAGLINE}. "
-        "Write an authentic, enthusiastic LinkedIn post to celebrate a contributor. "
-        "Keep it professional but warm. Use emojis appropriately. "
-        "The post MUST feel human-written — never generic or AI-sounding. "
-        "Never start with 'I am' or 'We are'. Be creative with the opening line each time. "
-        "The post MUST be at least 150 words and adequately explain the technical contribution."
+        f"You are the core maintainer of '{PROJECT_NAME}'. "
+        "Write a short, heartfelt, and genuine LinkedIn post thanking a contributor. "
+        "It MUST sound like a real human engineer expressing sincere gratitude from the heart. "
+        "Do not use corporate buzzwords. Keep it concise, high-quality, and impactful. "
+        "Use minimal formatting and very few emojis. It should feel like a personal shoutout, not a bot. "
+        "Never start with 'I am' or 'We are'."
     )
 
     user_prompt = (
-        f"Write a high-quality LinkedIn shoutout post celebrating this open-source contribution:\n\n"
+        f"Write a short, genuine LinkedIn shoutout for this contributor:\n\n"
         f"Contributor: {pr['author']} (GitHub Profile: https://github.com/{pr['author']})\n"
         f"PR Title: {pr['title']}\n"
         f"PR Number: #{pr['number']}\n"
-        f"Tier: {tier_display} ({tier_desc} contribution)\n"
+        f"Tier: {tier_display}\n"
         f"PR Link: {pr['url']}\n"
         f"Project: {PROJECT_NAME} — {PROJECT_TAGLINE}\n"
         f"PR Description: {pr['body'] if pr['body'] else 'Not provided'}\n\n"
         f"CRITICAL REQUIREMENTS:\n"
-        f"1. You MUST explicitly mention the contributor's name/handle and tag them as 'GitHub Contributor: @{pr['author']}'.\n"
-        f"2. You MUST clearly explain what feature/fix was implemented (referencing the PR Title/Description) in 1-2 bullet points so readers understand the value.\n"
-        f"3. You MUST praise the contributor for their hard work on this {tier_display} task.\n"
-        f"4. You MUST include a call-to-action inviting others to contribute to the GSSoC2026 project, with the repo link: {PROJECT_GITHUB_URL}\n"
-        f"5. Do NOT include hashtags at the very end (they are added automatically later), but you can use them inline if it feels natural.\n"
-        f"6. Write a complete, well-structured post. Do not cut off."
+        f"1. Start by directly thanking and tagging the contributor as 'GitHub Contributor: @{pr['author']}' in a warm, personal way.\n"
+        f"2. Mention briefly what they built ({pr['title']}) and why it's important for the project.\n"
+        f"3. Make them feel truly valued. Tell them their hard work is making a real difference in this {tier_display} task. Motivate them to keep solving issues.\n"
+        f"4. End by warmly welcoming new developers to join the journey (GSSoC2026), with the repo link: {PROJECT_GITHUB_URL}\n"
+        f"5. Keep the text short and easy to read. Do NOT use heavy bullet points, bolding, or too many emojis.\n"
+        f"6. Do NOT include hashtags at the end (they are added automatically later)."
     )
 
     url = (
@@ -257,20 +257,15 @@ def generate_post_with_gemini(pr: dict, tier_display: str, tier_desc: str) -> st
         return _static_fallback(pr, tier_display)
 
 
-def _static_fallback(pr: dict, tier_display: str) -> str:
     return (
-        f"🌟 Celebrating an incredible open-source contribution to {PROJECT_NAME}!\n\n"
-        f"Massive shoutout and appreciation to our talented contributor @{pr['author']} (https://github.com/{pr['author']}) "
-        f"for successfully implementing PR #{pr['number']}: \"{pr['title']}\"!\n\n"
-        f"💡 **What was achieved:**\n"
-        f"This was a {tier_display} contribution that significantly improves our platform's capabilities. "
-        f"{pr['author']} worked hard to bring this feature to life, ensuring high-quality code and robust architecture.\n\n"
-        f"{PROJECT_NAME} is {PROJECT_TAGLINE}. With the power of the open-source community and GSSoC2026, "
-        f"every merged PR brings us closer to making healthcare information accessible to every Indian citizen.\n\n"
-        f"Thank you, @{pr['author']}, for your dedication, technical expertise, and for building for India! 🇮🇳\n\n"
-        f"🚀 **Want to contribute?** Join us in building the future of HealthTech!\n"
-        f"GitHub Repo: {PROJECT_GITHUB_URL}\n"
-        f"View the PR: {pr['url']}"
+        f"A massive thank you from the heart to our contributor, @{pr['author']} (https://github.com/{pr['author']}).\n\n"
+        f"They just landed PR #{pr['number']}: \"{pr['title']}\". "
+        f"This was a {tier_display} contribution, and the effort put into it is truly inspiring. "
+        f"Your work is directly helping {PROJECT_NAME} become a better platform for everyone. We deeply value your time and technical expertise. "
+        f"Keep crushing those issues, @{pr['author']}!\n\n"
+        f"If anyone else wants to make a real impact and join our open-source journey for GSSoC2026, we'd love to welcome you.\n\n"
+        f"Repo: {PROJECT_GITHUB_URL}\n"
+        f"View PR: {pr['url']}"
     )
 
 
