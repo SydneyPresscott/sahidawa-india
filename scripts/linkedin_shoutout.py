@@ -386,10 +386,21 @@ def send_to_make_webhook(post_text: str, pr: dict) -> None:
     # We do NOT urlencode the text here because Make.com/LinkedIn double-encodes it.
     # We also remove the '#' character to prevent Make.com from treating it as a URL fragment and dropping the .png extension.
     banner_text = f"Huge thanks to {pr['author']} for their contribution to SahiDawa! 🚀"
-    image_url = f"https://og-image.vercel.app/{banner_text}.png?theme=dark&md=1&fontSize=75px"
+    encoded_text = urllib.parse.quote(banner_text)
+    
+    raw_image_url = f"https://og-image.vercel.app/{encoded_text}.png?theme=dark&md=1&fontSize=75px"
     if pr.get("author_avatar"):
         clean_avatar = pr['author_avatar'].split('?')[0]
-        image_url += f"&images={clean_avatar}"
+        raw_image_url += f"&images={clean_avatar}"
+        
+    # Use TinyURL to bypass Make.com's strict/buggy URL validation and double-encoding
+    try:
+        req = urllib.request.Request(f"https://tinyurl.com/api-create.php?url={urllib.parse.quote(raw_image_url)}")
+        with urllib.request.urlopen(req) as response:
+            image_url = response.read().decode('utf-8')
+    except Exception as e:
+        print(f"Warning: TinyURL failed ({e}), using raw URL")
+        image_url = raw_image_url
 
     payload = {
         "post_text": post_text,
