@@ -15,7 +15,11 @@ import {
     Search,
     Pencil,
     X,
+    ScanLine,
 } from "lucide-react";
+import { BarcodeScanner } from "@/components/scanner/BarcodeScanner";
+import { verifyMedicine } from "@/lib/api";
+import { toast } from "sonner";
 
 interface Medicine {
     id: string;
@@ -46,6 +50,53 @@ export default function ExpiryTrackerPage() {
     const [importError, setImportError] = useState<string | null>(null);
     const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
     const fileInputRef = useRef<HTMLInputElement>(null);
+
+    const [isScannerOpen, setIsScannerOpen] = useState(false);
+    const [isVerifying, setIsVerifying] = useState(false);
+    const [apiError, setApiError] = useState<string | null>(null);
+
+    const handleBarcodeScan = async (scannedText: string) => {
+        setIsVerifying(true);
+        setApiError(null);
+        try {
+            const result = await verifyMedicine(scannedText);
+            if (result.verified) {
+                setName(result.medicine.brand_name || "");
+                setBatchNumber(result.medicine.batch_number || scannedText);
+                if (result.medicine.expiry_date) {
+                    try {
+                        const d = new Date(result.medicine.expiry_date);
+                        if (!isNaN(d.getTime())) {
+                            const formattedDate = d.toISOString().split("T")[0];
+                            setExpiryDate(formattedDate);
+                            setDateError("");
+
+                            const selected = new Date(d);
+                            const today = new Date();
+                            today.setHours(0, 0, 0, 0);
+                            selected.setHours(0, 0, 0, 0);
+                            setIsExpired(selected < today);
+                        }
+                    } catch {
+                        // ignore
+                    }
+                }
+                toast.success("Medicine details auto-filled!");
+                setIsScannerOpen(false);
+            } else {
+                setBatchNumber(scannedText);
+                toast.warning("Medicine not found in database. Batch number filled.");
+                setIsScannerOpen(false);
+            }
+        } catch (error: any) {
+            console.error("Scan error:", error);
+            setBatchNumber(scannedText);
+            setApiError(error.message || "Failed to fetch medicine details.");
+            toast.error("Failed to fetch medicine details. Batch number filled.");
+        } finally {
+            setIsVerifying(false);
+        }
+    };
 
     useEffect(() => {
         const loadData = async () => {
@@ -460,6 +511,14 @@ export default function ExpiryTrackerPage() {
                                 />
                             </div>
                             <button
+                                type="button"
+                                onClick={() => setIsScannerOpen(true)}
+                                className="flex w-full items-center justify-center gap-2 rounded-xl border border-emerald-600/30 bg-emerald-600/10 py-3 text-sm font-semibold text-emerald-600 transition hover:bg-emerald-600/20 dark:border-emerald-400/30 dark:bg-emerald-400/10 dark:text-emerald-400"
+                            >
+                                <ScanLine size={16} />
+                                Scan Barcode
+                            </button>
+                            <button
                                 type="submit"
                                 className="w-full rounded-xl bg-emerald-600 py-3 font-bold text-white shadow-lg shadow-emerald-900/20 transition-all hover:bg-emerald-700 active:scale-95"
                             >
@@ -648,6 +707,42 @@ export default function ExpiryTrackerPage() {
                     </div>
                 </div>
             </main>
+
+            {isScannerOpen && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
+                    <div className="relative flex h-[80vh] w-full max-w-2xl flex-col rounded-3xl border border-(--color-border-muted) bg-(--color-surface-page) p-6 shadow-2xl dark:bg-slate-900">
+                        <div className="mb-4 flex items-center justify-between">
+                            <h3 className="text-xl font-bold text-(--color-text-primary)">
+                                Scan Medicine Barcode
+                            </h3>
+                            <button
+                                onClick={() => {
+                                    setIsScannerOpen(false);
+                                    setApiError(null);
+                                }}
+                                className="rounded-full p-1.5 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
+                            >
+                                <span className="sr-only">Close</span>
+                                <X size={20} />
+                            </button>
+                        </div>
+                        <div className="relative flex-1 overflow-hidden rounded-2xl bg-black">
+                            <BarcodeScanner
+                                onScan={handleBarcodeScan}
+                                debounceMs={2500}
+                                isVerifying={isVerifying}
+                                apiError={apiError}
+                                onRetry={() => {
+                                    setApiError(null);
+                                }}
+                            />
+                        </div>
+                        <div className="mt-4 text-center text-sm text-(--color-text-secondary)">
+                            Align the medicine barcode within the camera view to scan.
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
