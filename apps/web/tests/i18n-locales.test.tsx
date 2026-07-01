@@ -1,11 +1,3 @@
-<<<<<<< HEAD
-import { renderToStaticMarkup } from "react-dom/server";
-
-import LanguageSwitcher from "../app/[locale]/LanguageSwitcher";
-import { routing } from "../i18n/routing";
-
-=======
->>>>>>> 070041bb (fix(i18n): localize Footer, add fallback messages and test fixes)
 let activeLocale = "en";
 
 jest.mock("next-intl/middleware", () => jest.fn(() => () => undefined));

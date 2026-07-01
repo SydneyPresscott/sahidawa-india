@@ -1232,15 +1232,11 @@
         "confirmDelete": "Are you sure you want to delete this rule?",
         "fetchError": "Failed to fetch rules.",
         "addError": "Failed to add rule.",
-<<<<<<< HEAD
         "deleteError": "Failed to delete rule.",
         "uploadCsv": "Upload CSV",
         "uploading": "Uploading...",
         "uploadSuccess": "Successfully added {count} rules.",
         "invalidCsv": "Invalid CSV format. Ensure columns: original_term, normalized_term, type.",
         "uploadError": "Failed to upload CSV rules."
-=======
-        "deleteError": "Failed to delete rule."
->>>>>>> 070041bb (fix(i18n): localize Footer, add fallback messages and test fixes)
     }
 }
