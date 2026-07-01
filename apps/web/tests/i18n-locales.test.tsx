@@ -1,3 +1,12 @@
+let activeLocale = "en";
+
+jest.mock("next-intl/middleware", () => jest.fn(() => () => undefined));
+
+jest.mock("next-intl", () => ({
+    useLocale: () => activeLocale,
+    useTranslations: () => (key: string) => key,
+}));
+
 import { readdirSync, readFileSync } from "fs";
 import { join } from "path";
 import { renderToStaticMarkup } from "react-dom/server";
@@ -36,15 +45,6 @@ function readNestedValue(value: unknown, path: string): unknown {
         return (currentValue as JsonObject)[segment];
     }, value);
 }
-
-let activeLocale = "en";
-
-jest.mock("next-intl/middleware", () => jest.fn(() => () => undefined));
-
-jest.mock("next-intl", () => ({
-    useLocale: () => activeLocale,
-    useTranslations: () => (key: string) => key,
-}));
 
 describe("i18n locale availability", () => {
     it.each(["kn", "te", "pa"])("enables %s in the routing config", (locale) => {
